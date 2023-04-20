@@ -1,0 +1,13 @@
+.github/
+node_modules/
+data/
+.idea/
+.vscode/
+coverage/
+
+src/
+test/
+examples/
+
+.travis.yml
+.editorconfig
