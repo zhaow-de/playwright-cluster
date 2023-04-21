@@ -1,6 +1,6 @@
 {
   "name": "@zhaow-de/playwright-cluster",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Cluster management for playwright",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
