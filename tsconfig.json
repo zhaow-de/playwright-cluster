@@ -11,8 +11,8 @@
       "node",
       "jest"
     ],
-    "rootDir": "./src",
-    "outDir": "./dist",
+    "rootDir": ".",
+    "outDir": "dist",
     "strict": true,
     "inlineSourceMap": true,
     "noImplicitReturns": true,
@@ -20,6 +20,7 @@
     "skipLibCheck": true
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "test/**/*"
   ]
 }

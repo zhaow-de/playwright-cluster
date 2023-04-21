@@ -6,8 +6,10 @@ interface SystemLoad {
 }
 
 const INIT_INTERVAL = 50;
-const MEASURE_INTERVAL = 200;
 
+//
+// Do not forget to update test/SystemMonitor.test.ts if you change these two values
+const MEASURE_INTERVAL = 200;
 // timespan of which to measure load
 // must be a multiple of MEASURE_INTERVAL
 const MEASURE_TIMESPAN = 5000;
@@ -23,15 +25,12 @@ export class SystemMonitor {
   private interval: NodeJS.Timer | null = null;
 
   // After init is called there is at least something in the cpuUsage thingy
-  public init() {
+  public async init(): Promise<void> {
     this.calcLoad();
-    return new Promise<void>((resolve) => {
-      setTimeout(() => {
-        this.calcLoad();
-        this.interval = setInterval(() => this.calcLoad(), MEASURE_INTERVAL);
-        resolve();
-      }, INIT_INTERVAL);
-    });
+    await new Promise<void>((resolve) => setTimeout(() => resolve(), INIT_INTERVAL));
+    this.calcLoad();
+
+    this.interval = setInterval(() => this.calcLoad(), MEASURE_INTERVAL);
   }
 
   public close() {
@@ -44,6 +43,7 @@ export class SystemMonitor {
     let totalTick = 0;
     const cpus = os.cpus();
 
+    /* istanbul ignore next */
     if (!cpus) {
       // In some environments, os.cpus() might return undefined (although it's not stated in
       // the Node.js docs), see #113 for more information
