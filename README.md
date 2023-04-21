@@ -25,3 +25,7 @@ The documentation from puppeteer-cluster is still valid as the reference.
 - [Typings for input/output (via TypeScript Generics)](https://github.com/thomasdondorf/puppeteer-cluster#typings-for-inputoutput-via-typescript-generics)
 - [Debugging](https://github.com/thomasdondorf/puppeteer-cluster#debugging)
 - [API](https://github.com/thomasdondorf/puppeteer-cluster#api)
+
+## Note
+
+Firefox is hardcoded as the headless browser. This library does not work with Chromium or Webkit.

@@ -19,7 +19,7 @@ export abstract class SingleBrowserImplementation extends ConcurrencyImplementat
     super(options, playwright);
   }
 
-  private async repair() {
+  protected async repair() {
     if (this.openInstances !== 0 || this.repairing) {
       // already repairing or there are still pages open? wait for start/finish
       await new Promise<void>((resolve) => this.waitingForRepairResolvers.push(resolve));
@@ -33,18 +33,21 @@ export abstract class SingleBrowserImplementation extends ConcurrencyImplementat
       // will probably fail, but just in case the repair was not necessary
       await (this.browser as playwright.Browser).close();
     } catch (e) {
+      /* istanbul ignore next */
       debug('Unable to close browser.');
     }
 
     try {
       this.browser = (await this.playwright.firefox.launch(this.options)) as playwright.Browser;
     } catch (err) {
-      throw new Error('Unable to restart chrome.');
+      /* istanbul ignore next */
+      throw new Error('Unable to restart browser.');
     }
     this.repairRequested = false;
     this.repairing = false;
     this.waitingForRepairResolvers.forEach((resolve) => resolve());
     this.waitingForRepairResolvers = [];
+    debug('Repair finished');
   }
 
   public async init() {
@@ -83,6 +86,7 @@ export abstract class SingleBrowserImplementation extends ConcurrencyImplementat
             this.openInstances -= 1; // decrement first in case of error
             await timeoutExecute(BROWSER_TIMEOUT, this.freeResources(resources));
 
+            /* istanbul ignore next */
             if (this.repairRequested) {
               await this.repair();
             }

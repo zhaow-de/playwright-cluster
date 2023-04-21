@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": [
+      "node"
+    ],
+    "sourceMap": false,
+    "inlineSourceMap": false,
+    "removeComments": true
+  },
+  "include": [
+    "src/**/*"
+  ]
+}

@@ -133,6 +133,7 @@ export class Cluster<JobData = any, ReturnData = any> extends EventEmitter {
       // check for null or undefined
       playwright = require('playwright');
     } else {
+      /* istanbul ignore next */
       debug('Using provided (custom) playwright object.');
     }
 
@@ -308,6 +309,9 @@ export class Cluster<JobData = any, ReturnData = any> extends EventEmitter {
     } else if (this.taskFunction !== null) {
       jobFunction = this.taskFunction;
     } else {
+      // It should not reach this point, because `Worker.handle` should throw error "TypeError: task is not a function"
+      // already.
+      /* istanbul ignore next */
       throw new Error('No task function defined!');
     }
 
@@ -440,6 +444,7 @@ export class Cluster<JobData = any, ReturnData = any> extends EventEmitter {
     try {
       await (this.browser as ConcurrencyImplementation).close();
     } catch (err: any) {
+      /* istanbul ignore next */
       debug(`Error: Unable to close browser, message: ${err.message}`);
     }
 
@@ -506,6 +511,7 @@ export class Cluster<JobData = any, ReturnData = any> extends EventEmitter {
         if (worker.activeTarget) {
           workerUrl = worker.activeTarget.getUrl() || 'UNKNOWN TARGET';
         } else {
+          /* istanbul ignore next */
           workerUrl = 'NO TARGET (should not be happening)';
         }
       }
@@ -513,6 +519,7 @@ export class Cluster<JobData = any, ReturnData = any> extends EventEmitter {
       display.log(`   #${i} ${workOrIdle} ${workerUrl}`);
     });
     for (let i = 0; i < this.workersStarting; i += 1) {
+      /* istanbul ignore next */
       display.log(`   #${this.workers.length + i} STARTING...`);
     }
 

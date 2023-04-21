@@ -4,6 +4,11 @@ import { ResourceData } from '../ConcurrencyImplementation';
 import { SingleBrowserImplementation } from '../SingleBrowserImplementation';
 
 export class Page extends SingleBrowserImplementation {
+  protected async repair(): Promise<void> {
+    this.resetContext();
+    return super.repair();
+  }
+
   private context: playwright.BrowserContext | null = null;
 
   protected async createResources(): Promise<ResourceData> {
@@ -14,6 +19,10 @@ export class Page extends SingleBrowserImplementation {
     return {
       page: await this.context.newPage(),
     };
+  }
+
+  public resetContext() {
+    this.context = null;
   }
 
   protected async freeResources(resources: ResourceData): Promise<void> {

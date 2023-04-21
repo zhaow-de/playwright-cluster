@@ -130,6 +130,7 @@ export class Worker<JobData, ReturnData> implements WorkerOptions {
     try {
       await this.browser.close();
     } catch (err: any) {
+      /* istanbul ignore next */
       debug(`Unable to close worker browser. Error message: ${err.message}`);
     }
     debug(`Closed #${this.id}`);
