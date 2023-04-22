@@ -1,6 +1,6 @@
 {
   "name": "@zhaow-de/playwright-cluster",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Cluster management for playwright",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
@@ -37,7 +37,7 @@
     "@typescript-eslint/eslint-plugin": "^5.59.0",
     "@typescript-eslint/parser": "^5.59.0",
     "coveralls": "^3.1.1",
-    "eslint": "^8.38.0",
+    "eslint": "^8.39.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-config-standard": "^17.0.0",
     "eslint-plugin-import": "^2.27.5",
@@ -56,5 +56,8 @@
   },
   "directories": {
     "test": "test"
-  }
+  },
+  "files": [
+    "dist/src/**/*"
+  ]
 }
