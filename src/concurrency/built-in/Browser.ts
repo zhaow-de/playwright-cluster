@@ -14,6 +14,7 @@ export class Browser extends ConcurrencyImplementation {
 
   public async workerInstance(perBrowserOptions: playwright.LaunchOptions | undefined): Promise<WorkerInstance> {
     const options = perBrowserOptions || this.options;
+    const contextOptions = Object.keys(this.contextOptions).length > 0 ? this.contextOptions : undefined;
     let firefox = (await this.playwright.firefox.launch(options)) as playwright.Browser;
     let page: playwright.Page;
     let context: any;
@@ -23,7 +24,7 @@ export class Browser extends ConcurrencyImplementation {
         await timeoutExecute(
           BROWSER_TIMEOUT,
           (async () => {
-            context = await firefox.newContext();
+            context = await firefox.newContext(contextOptions);
             page = await context.newPage();
           })()
         );

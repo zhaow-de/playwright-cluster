@@ -5,7 +5,7 @@ import { Worker, WorkResult } from './Worker';
 
 import * as builtInConcurrency from './concurrency/builtInConcurrency';
 
-import type { Page, LaunchOptions } from 'playwright';
+import type { Page, LaunchOptions, BrowserContextOptions } from 'playwright';
 import { Queue } from './Queue';
 import { SystemMonitor } from './SystemMonitor';
 import { EventEmitter } from 'events';
@@ -23,6 +23,7 @@ interface ClusterOptions {
   workerCreationDelay: number;
   playwrightOptions: LaunchOptions;
   perBrowserOptions: LaunchOptions[] | undefined;
+  contextOptions: BrowserContextOptions;
   monitor: boolean;
   timeout: number;
   retryLimit: number;
@@ -45,6 +46,7 @@ const DEFAULT_OPTIONS: ClusterOptions = {
   playwrightOptions: {
     // headless: false, // just for testing...
   },
+  contextOptions: {},
   perBrowserOptions: undefined,
   monitor: false,
   timeout: 30 * 1000,
@@ -127,6 +129,7 @@ export class Cluster<JobData = any, ReturnData = any> extends EventEmitter {
 
   private async init() {
     const browserOptions = this.options.playwrightOptions;
+    const contextOptions = this.options.contextOptions;
     let playwright = this.options.playwright;
 
     if (this.options.playwright == null) {
@@ -138,14 +141,14 @@ export class Cluster<JobData = any, ReturnData = any> extends EventEmitter {
     }
 
     if (this.options.concurrency === Cluster.CONCURRENCY_PAGE) {
-      this.browser = new builtInConcurrency.Page(browserOptions, playwright);
+      this.browser = new builtInConcurrency.Page(browserOptions, contextOptions, playwright);
     } else if (this.options.concurrency === Cluster.CONCURRENCY_CONTEXT) {
-      this.browser = new builtInConcurrency.Context(browserOptions, playwright);
+      this.browser = new builtInConcurrency.Context(browserOptions, contextOptions, playwright);
     } else if (this.options.concurrency === Cluster.CONCURRENCY_BROWSER) {
-      this.browser = new builtInConcurrency.Browser(browserOptions, playwright);
+      this.browser = new builtInConcurrency.Browser(browserOptions, contextOptions, playwright);
     } else if (typeof this.options.concurrency === 'function') {
       // eslint-disable-next-line new-cap
-      this.browser = new this.options.concurrency(browserOptions, playwright);
+      this.browser = new this.options.concurrency(browserOptions, contextOptions, playwright);
     } else {
       throw new Error(`Unknown concurrency option: ${this.options.concurrency}`);
     }
@@ -166,6 +169,7 @@ export class Cluster<JobData = any, ReturnData = any> extends EventEmitter {
       // @ts-ignore TS2531: Object is possibly 'null'.
       await this.browser.init();
     } catch (err: any) {
+      /* istanbul ignore next */
       throw new Error(`Unable to launch browser, error message: ${err.message}`);
     }
 
@@ -195,6 +199,7 @@ export class Cluster<JobData = any, ReturnData = any> extends EventEmitter {
     try {
       workerBrowserInstance = await (this.browser as ConcurrencyImplementation).workerInstance(nextWorkerOption);
     } catch (err: any) {
+      /* istanbul ignore next */
       throw new Error(`Unable to launch browser for worker, error message: ${err.message}`);
     }
 
@@ -206,8 +211,10 @@ export class Cluster<JobData = any, ReturnData = any> extends EventEmitter {
     });
     this.workersStarting -= 1;
 
+    /* istanbul ignore next */
     if (this.isClosed) {
       // cluster was closed while we created a new worker (should rarely happen)
+      /* istanbul ignore next */
       worker.close();
     } else {
       this.workersAvail.push(worker);
@@ -365,7 +372,7 @@ export class Cluster<JobData = any, ReturnData = any> extends EventEmitter {
     return (
       // option: maxConcurrency
       (this.options.maxConcurrency === 0 || workerCount < this.options.maxConcurrency) &&
-      // just allow worker creaton every few milliseconds
+      // just allow worker creation every few milliseconds
       (this.options.workerCreationDelay === 0 ||
         this.lastLaunchedWorkerTime + this.options.workerCreationDelay < Date.now())
     );

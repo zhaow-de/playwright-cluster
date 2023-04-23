@@ -5,7 +5,8 @@ import { SingleBrowserImplementation } from '../SingleBrowserImplementation';
 
 export class Context extends SingleBrowserImplementation {
   protected async createResources(): Promise<ResourceData> {
-    const context = await (this.browser as playwright.Browser).newContext();
+    const contextOptions = Object.keys(this.contextOptions).length > 0 ? this.contextOptions : undefined;
+    const context = await (this.browser as playwright.Browser).newContext(contextOptions);
     const page = await context.newPage();
     return {
       context,
