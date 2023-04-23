@@ -28,4 +28,6 @@ The documentation from puppeteer-cluster is still valid as the reference.
 
 ## Note
 
-Firefox is hardcoded as the headless browser. This library does not work with Chromium or Webkit.
+1. Firefox is hardcoded as the headless browser. This library does not work with Chromium or Webkit.
+2. `BrowserContext` is not available in Puppeteer. Some options, e.g. `ignoreHTTPSErrors` cannot be directly translated from 
+   `puppeteerOptions` to `playwrightOptions`. Therefore, we introduced `contextOptions` as an optional property in `ClusterOptions`.

@@ -13,8 +13,9 @@ export class Page extends SingleBrowserImplementation {
 
   protected async createResources(): Promise<ResourceData> {
     const browser = this.browser as playwright.Browser;
+    const contextOptions = Object.keys(this.contextOptions).length > 0 ? this.contextOptions : undefined;
     if (!this.context) {
-      this.context = await browser.newContext();
+      this.context = await browser.newContext(contextOptions);
     }
     return {
       page: await this.context.newPage(),

@@ -15,8 +15,12 @@ export abstract class SingleBrowserImplementation extends ConcurrencyImplementat
   private openInstances = 0;
   private waitingForRepairResolvers: (() => void)[] = [];
 
-  public constructor(options: playwright.LaunchOptions, playwright: any) {
-    super(options, playwright);
+  public constructor(
+    options: playwright.LaunchOptions,
+    contextOptions: playwright.BrowserContextOptions,
+    playwright: any
+  ) {
+    super(options, contextOptions, playwright);
   }
 
   protected async repair() {

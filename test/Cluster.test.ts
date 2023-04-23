@@ -139,6 +139,33 @@ describe('options', () => {
       await cluster.close();
     });
 
+    test('contextOptions', async () => {
+      expect.assertions(1);
+
+      const cluster = await Cluster.launch({
+        concurrency,
+        playwrightOptions: { args: ['--no-sandbox'] },
+        contextOptions: {
+          baseURL: TEST_URL,
+        },
+        maxConcurrency: 1,
+        skipDuplicateUrls: true,
+      });
+      cluster.on('taskerror', (err) => {
+        throw err;
+      });
+
+      cluster.task(async ({ page, data: url }) => {
+        expect(url).toBe('/');
+      });
+
+      // here we navigate to a relative URL, the result should be the same as the absolute URL as we set the baseURL
+      cluster.queue('/');
+
+      await cluster.idle();
+      await cluster.close();
+    });
+
     test('skipDuplicateUrls (parallel)', async () => {
       expect.assertions(1);
 
