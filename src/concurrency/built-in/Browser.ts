@@ -1,7 +1,7 @@
 import * as playwright from 'playwright';
 
-import { debugGenerator, timeoutExecute } from '../../util';
-import { ConcurrencyImplementation, WorkerInstance } from '../ConcurrencyImplementation';
+import { debugGenerator, timeoutExecute } from '../../util.js';
+import { ConcurrencyImplementation, WorkerInstance } from '../ConcurrencyImplementation.js';
 
 const debug = debugGenerator('BrowserConcurrency');
 

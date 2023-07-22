@@ -2,14 +2,14 @@
 import * as http from 'http';
 import * as playwright from 'playwright';
 
-import { Cluster } from '../src';
-import { timeoutExecute } from '../src/util';
-import { ConcurrencyImplementation, ResourceData } from '../src/concurrency/ConcurrencyImplementation';
-import { Browser } from '../src/concurrency/built-in/Browser';
-import * as psList from 'ps-list';
+import { Cluster } from '../src/Cluster.js';
+import { timeoutExecute } from '../src/util.js';
+import { ConcurrencyImplementation, ResourceData } from '../src/concurrency/ConcurrencyImplementation.js';
+import { Browser } from '../src/concurrency/built-in/Browser.js';
+import psList from 'ps-list';
 
-import * as kill from 'tree-kill';
-import { SingleBrowserImplementation } from '../src/concurrency/SingleBrowserImplementation';
+import kill from 'tree-kill';
+import { SingleBrowserImplementation } from '../src/concurrency/SingleBrowserImplementation.js';
 
 let testServer: http.Server;
 

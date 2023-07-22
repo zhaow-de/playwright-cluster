@@ -1,9 +1,9 @@
-import { Job } from './Job';
-import type { Cluster, TaskFunction } from './Cluster';
+import { Job } from './Job.js';
+import type { Cluster, TaskFunction } from './Cluster.js';
 import type { Page } from 'playwright';
-import { timeoutExecute, debugGenerator, log } from './util';
+import { timeoutExecute, debugGenerator, log } from './util.js';
 import { inspect } from 'util';
-import { WorkerInstance, JobInstance } from './concurrency/ConcurrencyImplementation';
+import { WorkerInstance, JobInstance } from './concurrency/ConcurrencyImplementation.js';
 
 const debug = debugGenerator('Worker');
 

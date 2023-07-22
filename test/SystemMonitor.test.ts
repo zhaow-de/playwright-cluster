@@ -1,5 +1,5 @@
 // Align the following two values with src/SystemMonitor.ts
-import { SystemMonitor } from '../src/SystemMonitor';
+import { SystemMonitor } from '../src/SystemMonitor.js';
 
 const MEASURE_INTERVAL = 200;
 const MEASURE_TIMESPAN = 5000;

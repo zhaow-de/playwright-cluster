@@ -1,4 +1,4 @@
-import { Cluster } from '../src';
+import { Cluster } from '../src/Cluster.js';
 
 test('Cluster is exported', () => {
   expect(Cluster).toBeDefined();

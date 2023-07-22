@@ -1,19 +1,19 @@
-import { ExecuteResolve, ExecuteReject, ExecuteCallbacks, Job } from './Job';
-import { Display } from './Display';
-import * as util from './util';
-import { Worker, WorkResult } from './Worker';
+import { ExecuteResolve, ExecuteReject, ExecuteCallbacks, Job } from './Job.js';
+import { Display } from './Display.js';
+import * as util from './util.js';
+import { Worker, WorkResult } from './Worker.js';
 
-import * as builtInConcurrency from './concurrency/builtInConcurrency';
+import * as builtInConcurrency from './concurrency/builtInConcurrency.js';
 
 import type { Page, LaunchOptions, BrowserContextOptions } from 'playwright';
-import { Queue } from './Queue';
-import { SystemMonitor } from './SystemMonitor';
+import { Queue } from './Queue.js';
+import { SystemMonitor } from './SystemMonitor.js';
 import { EventEmitter } from 'events';
 import {
   WorkerInstance,
   ConcurrencyImplementationClassType,
   ConcurrencyImplementation,
-} from './concurrency/ConcurrencyImplementation';
+} from './concurrency/ConcurrencyImplementation.js';
 
 const debug = util.debugGenerator('Cluster');
 
@@ -134,7 +134,7 @@ export class Cluster<JobData = any, ReturnData = any> extends EventEmitter {
 
     if (this.options.playwright == null) {
       // check for null or undefined
-      playwright = require('playwright');
+      playwright = await import('playwright');
     } else {
       /* istanbul ignore next */
       debug('Using provided (custom) playwright object.');
