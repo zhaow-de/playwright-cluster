@@ -1,23 +1,31 @@
 {
+  "extends": "@tsconfig/node20/tsconfig.json",
   "compilerOptions": {
-    "target": "ESNext",
-    "lib": [
-      "ES2022",
-      "ESNext"
-    ],
-    "module": "commonjs",
-    "moduleResolution": "Node16",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "allowJs": false,
+    "declaration": true,
+    "allowSyntheticDefaultImports": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "checkJs": false,
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": true,
     "types": [
       "node",
       "jest"
     ],
-    "rootDir": ".",
-    "outDir": "dist",
-    "strict": true,
-    "inlineSourceMap": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "noImplicitReturns": true,
-    "declaration": true,
-    "skipLibCheck": true
+    "noFallthroughCasesInSwitch": true,
+    "rootDir": "./",
+    "outDir": "./dist",
   },
   "include": [
     "src/**/*",

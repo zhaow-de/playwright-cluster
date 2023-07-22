@@ -1,4 +1,4 @@
-import { Job } from '../src/Job';
+import { Job } from '../src/Job.js';
 
 describe('Job', () => {
   it('should extract url', () => {

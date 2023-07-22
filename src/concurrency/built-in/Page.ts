@@ -1,7 +1,7 @@
 import * as playwright from 'playwright';
 
-import { ResourceData } from '../ConcurrencyImplementation';
-import { SingleBrowserImplementation } from '../SingleBrowserImplementation';
+import { ResourceData } from '../ConcurrencyImplementation.js';
+import { SingleBrowserImplementation } from '../SingleBrowserImplementation.js';
 
 export class Page extends SingleBrowserImplementation {
   protected async repair(): Promise<void> {

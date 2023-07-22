@@ -1,4 +1,6 @@
-import { formatDateTime, formatDuration, timeoutExecute } from '../src/util';
+import { jest } from '@jest/globals';
+
+import { formatDateTime, formatDuration, timeoutExecute } from '../src/util.js';
 
 describe('formatDateTime', () => {
   test('formats dates', () => {

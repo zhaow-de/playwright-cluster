@@ -1,1 +1,1 @@
-export { Cluster } from './Cluster';
+export { Cluster } from './Cluster.js';

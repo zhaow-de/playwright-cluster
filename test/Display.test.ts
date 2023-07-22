@@ -1,4 +1,4 @@
-import { Display } from '../src/Display';
+import { Display } from '../src/Display.js';
 
 describe('Display', () => {
   let write: any;
