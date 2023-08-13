@@ -14,7 +14,7 @@ interface WorkerOptions {
   browser: WorkerInstance;
 }
 
-const BROWSER_INSTANCE_TRIES = 10;
+const BROWSER_INSTANCE_TRIES = 5;
 
 export interface WorkError {
   type: 'error';
@@ -29,6 +29,7 @@ export interface WorkData {
 export type WorkResult = WorkError | WorkData;
 
 export class Worker<JobData, ReturnData> implements WorkerOptions {
+  public isClosed = false;
   public cluster: Cluster;
   public args: string[];
   public id: number;
@@ -57,7 +58,7 @@ export class Worker<JobData, ReturnData> implements WorkerOptions {
 
     let tries = 0;
 
-    while (jobInstance === null) {
+    while (jobInstance === null && !this.isClosed) {
       try {
         jobInstance = await this.browser.jobInstance();
         page = jobInstance.resources.page;
@@ -71,12 +72,18 @@ export class Worker<JobData, ReturnData> implements WorkerOptions {
       }
     }
 
+    if (this.isClosed) {
+      return {
+        data: 'Worker closed',
+        type: 'success',
+      };
+    }
     // We can be sure that page is set now, otherwise an exception would've been thrown
     page = page as Page; // this is just for TypeScript
 
     let errorState: Error | null = null;
 
-    page.on('pageerror', (err: any) => {
+    page.on('crash', (err: any) => {
       errorState = err;
       log(`Error (page error) crawling ${inspect(job.data)} // message: ${err.message}`);
     });
@@ -106,7 +113,7 @@ export class Worker<JobData, ReturnData> implements WorkerOptions {
     debug(`Finished executing task on worker #${this.id}`);
 
     try {
-      await jobInstance.close();
+      await jobInstance?.close();
     } catch (e: any) {
       debug(`Error closing browser instance for ${inspect(job.data)}: ${e.message}`);
       await this.browser.repair();
@@ -128,6 +135,7 @@ export class Worker<JobData, ReturnData> implements WorkerOptions {
 
   public async close(): Promise<void> {
     try {
+      this.isClosed = true;
       await this.browser.close();
     } catch (err: any) {
       /* istanbul ignore next */

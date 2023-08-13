@@ -1,4 +1,4 @@
-import * as playwright from 'playwright';
+import playwright from 'playwright';
 
 import { debugGenerator, timeoutExecute } from '../../util.js';
 import { ConcurrencyImplementation, WorkerInstance } from '../ConcurrencyImplementation.js';
@@ -8,9 +8,17 @@ const debug = debugGenerator('BrowserConcurrency');
 const BROWSER_TIMEOUT = 5000;
 
 export class Browser extends ConcurrencyImplementation {
+  public browser: playwright.Browser | null = null;
+
   public async init() {}
 
-  public async close() {}
+  public async close() {
+    try {
+      await (this.browser as playwright.Browser)?.close();
+    } catch (error: any) {
+      debug('Error closing browser: ' + error.message);
+    }
+  }
 
   public async workerInstance(perBrowserOptions: playwright.LaunchOptions | undefined): Promise<WorkerInstance> {
     const options = perBrowserOptions || this.options;
