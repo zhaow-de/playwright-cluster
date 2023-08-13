@@ -30,7 +30,7 @@ interface ClusterOptions {
   retryDelay: number;
   skipDuplicateUrls: boolean;
   sameDomainDelay: number;
-  playwright: any;
+  playwright: BrowserType | null | undefined;
 }
 
 type Partial<T> = {
@@ -119,7 +119,7 @@ export class Cluster<JobData = any, ReturnData = any> extends EventEmitter {
   private startTime = Date.now();
   private nextWorkerId = -1;
 
-  private monitoringInterval: NodeJS.Timer | null = null;
+  private monitoringInterval: NodeJS.Timeout | null = null;
   private display: Display | null = null;
 
   private duplicateCheckUrls: Set<string> = new Set();
@@ -127,7 +127,7 @@ export class Cluster<JobData = any, ReturnData = any> extends EventEmitter {
 
   private systemMonitor: SystemMonitor = new SystemMonitor();
 
-  private checkForWorkInterval: NodeJS.Timer | null = null;
+  private checkForWorkInterval: NodeJS.Timeout | null = null;
 
   public static async launch(options: ClusterOptionsArgument) {
     debug('Launching');

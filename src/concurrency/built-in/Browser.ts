@@ -15,16 +15,17 @@ export class Browser extends ConcurrencyImplementation {
   public async workerInstance(perBrowserOptions: playwright.LaunchOptions | undefined): Promise<WorkerInstance> {
     const options = perBrowserOptions || this.options;
     const contextOptions = Object.keys(this.contextOptions).length > 0 ? this.contextOptions : undefined;
-    let firefox = (await this.playwright.firefox.launch(options)) as playwright.Browser;
+    let browser = (await this.playwright.launch(options)) as playwright.Browser;
+    this.browser = browser;
     let page: playwright.Page;
-    let context: any;
+    let context: playwright.BrowserContext;
 
     return {
       jobInstance: async () => {
         await timeoutExecute(
           BROWSER_TIMEOUT,
           (async () => {
-            context = await firefox.newContext(contextOptions);
+            context = await browser.newContext(contextOptions);
             page = await context.newPage();
           })()
         );
@@ -41,18 +42,18 @@ export class Browser extends ConcurrencyImplementation {
       },
 
       close: async () => {
-        await firefox.close();
+        await browser.close();
       },
 
       repair: async () => {
         debug('Starting repair');
         try {
           // will probably fail, but just in case the repair was not necessary
-          await firefox.close();
+          await browser.close();
         } catch (e) {}
 
         // just relaunch as there is only one page per browser
-        firefox = await this.playwright.firefox.launch(options);
+        browser = await this.playwright.launch(options);
       },
     };
   }

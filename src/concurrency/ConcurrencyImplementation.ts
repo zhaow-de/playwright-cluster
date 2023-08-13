@@ -1,4 +1,4 @@
-import { Page, LaunchOptions, BrowserContextOptions } from 'playwright';
+import { Page, LaunchOptions, BrowserContextOptions, BrowserType } from 'playwright';
 
 export interface ResourceData {
   page: Page;
@@ -49,14 +49,14 @@ export interface WorkerInstance {
 export abstract class ConcurrencyImplementation {
   protected options: LaunchOptions;
   protected contextOptions: BrowserContextOptions;
-  protected playwright: any;
+  protected playwright: BrowserType;
 
   /**
    * @param options  Options that should be provided to playwright.launch
    * @param contextOptions Options that should be provided to browser.newContext
    * @param playwright  playwright object
    */
-  public constructor(options: LaunchOptions, contextOptions: BrowserContextOptions, playwright: any) {
+  public constructor(options: LaunchOptions, contextOptions: BrowserContextOptions, playwright: BrowserType) {
     this.options = options;
     this.contextOptions = contextOptions;
     this.playwright = playwright;
@@ -81,5 +81,5 @@ export abstract class ConcurrencyImplementation {
 export type ConcurrencyImplementationClassType = new (
   options: LaunchOptions,
   contextOptions: BrowserContextOptions,
-  playwright: any
+  playwright: BrowserType
 ) => ConcurrencyImplementation;

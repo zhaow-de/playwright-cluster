@@ -4,12 +4,11 @@ import * as playwright from 'playwright';
 
 import { Cluster } from '../src/Cluster.js';
 import { timeoutExecute } from '../src/util.js';
-import { ConcurrencyImplementation, ResourceData } from '../src/concurrency/ConcurrencyImplementation.js';
+import { ConcurrencyImplementation } from '../src/concurrency/ConcurrencyImplementation.js';
 import { Browser } from '../src/concurrency/built-in/Browser.js';
 import psList from 'ps-list';
 
 import kill from 'tree-kill';
-import { SingleBrowserImplementation } from '../src/concurrency/SingleBrowserImplementation.js';
 
 let testServer: http.Server;
 
@@ -520,7 +519,7 @@ describe('options', () => {
         maxConcurrency: 1,
       });
       cluster.on('taskerror', (err) => {
-        // queue is catched in here
+        // queue is caught in here
         expect(err.message).toBe('queued');
       });
 
@@ -532,7 +531,7 @@ describe('options', () => {
         await cluster.execute('executed');
         expect(1).toBe(2); // fail, should never reach this point
       } catch (e: any) {
-        // execute is catched in here
+        // execute is caught in here
         expect(e.message).toBe('executed');
       }
       cluster.queue('queued');
@@ -607,7 +606,7 @@ describe('options', () => {
         private browser: playwright.Browser | undefined = undefined;
 
         public async init() {
-          this.browser = await this.playwright.firefox.launch(this.options);
+          this.browser = await this.playwright.launch(this.options);
         }
 
         public async close() {
@@ -710,7 +709,7 @@ describe('options', () => {
         private browser: playwright.Browser | undefined = undefined;
 
         public async init() {
-          this.browser = await this.playwright.firefox.launch(this.options);
+          this.browser = await this.playwright.launch(this.options);
         }
 
         public async close() {
