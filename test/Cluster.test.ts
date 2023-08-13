@@ -825,6 +825,90 @@ describe('options', () => {
   });
 });
 
+describe('status metrics', () => {
+  let write: any;
+  let log: any;
+  let output = '';
+
+  const cleanup = () => {
+    process.stdout.write = write;
+    console.log = log;
+  };
+
+  beforeEach(() => {
+    output = '';
+    write = process.stdout.write;
+    log = console.log;
+
+    (process.stdout.write as any) = (str: string) => {
+      output += str;
+    };
+
+    console.log = (str) => {
+      output += `${str}\n`;
+    };
+  });
+
+  afterEach(cleanup);
+
+  test('metrics', async () => {
+    const cluster = await Cluster.launch({
+      concurrency: Cluster.CONCURRENCY_CONTEXT,
+      playwrightOptions: { args: ['--no-sandbox'] },
+      maxConcurrency: 1,
+    });
+    cluster.on('taskerror', (err) => {
+      throw err;
+    });
+
+    cluster.task(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 550));
+    });
+
+    cluster.queue(TEST_URL);
+
+    let metrics = cluster.status();
+    expect(metrics).toEqual({
+      allTargetCount: 1,
+      donePercStr: '0.00%',
+      doneTargets: 0,
+      errorCount: 0,
+      errorPerc: '0.00%',
+      idle: false,
+      now: expect.any(String),
+      pagesPerSecond: '0',
+      pagesPerSecondString: '0 pages/second',
+      remainingPages: 1,
+      startTime: expect.any(String),
+      timeRemaining: 'unknown',
+      timeRunning: expect.any(String),
+      workers: [],
+    });
+
+    await cluster.idle();
+    metrics = cluster.status();
+    expect(metrics).toEqual({
+      allTargetCount: 1,
+      donePercStr: '100.00%',
+      doneTargets: 1,
+      errorCount: 0,
+      errorPerc: '0.00%',
+      idle: true,
+      now: expect.any(String),
+      pagesPerSecond: expect.any(String),
+      pagesPerSecondString: expect.any(String),
+      remainingPages: 0,
+      startTime: expect.any(String),
+      timeRemaining: expect.any(String),
+      timeRunning: expect.any(String),
+      workers: expect.any(Array),
+    });
+    expect(metrics.pagesPerSecond.length).toBeGreaterThan(1);
+    expect(metrics.workers.length).toBeGreaterThan(0);
+    await cluster.close();
+  });
+});
+
 describe('Repair', () => {
   const getRandomId = () => Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString(16);
 
@@ -878,63 +962,4 @@ describe('Repair', () => {
     },
     60000
   );
-
-  // eslint-disable-next-line jest/no-disabled-tests
-  test.skip('coordination', async () => {
-    expect.assertions(2);
-
-    class CustomConcurrency extends SingleBrowserImplementation {
-      protected async repair(): Promise<void> {
-        return super.repair();
-      }
-
-      protected async createResources(): Promise<ResourceData> {
-        if (!this.browser) {
-          this.browser = await this.playwright.firefox.launch(this.options);
-        }
-        return {
-          page: await (this.browser as playwright.Browser).newPage(),
-        };
-      }
-
-      protected async freeResources(resources: ResourceData): Promise<void> {
-        await resources.page.close();
-      }
-
-      async workerInstance(): Promise<{
-        repair: () => Promise<void>;
-        close: () => Promise<void>;
-        jobInstance: () => Promise<{ resources: ResourceData; close: () => Promise<void> }>;
-      }> {
-        return {
-          jobInstance: async () => {
-            throw new Error('cannot initialize');
-          },
-          close: (await super.workerInstance()).close,
-          repair: (await super.workerInstance()).repair,
-        };
-      }
-    }
-
-    const cluster = await Cluster.launch({
-      concurrency: CustomConcurrency,
-      playwrightOptions: { args: ['--no-sandbox'] },
-      maxConcurrency: 1,
-    });
-    cluster.on('taskerror', (err) => {
-      throw err;
-    });
-
-    cluster.task(async ({ page, data: url }) => {
-      expect.assertions(1);
-      await expect(page.goto(url)).rejects.toEqual({
-        error: 'Unable to get browser page',
-      });
-    });
-
-    cluster.queue(TEST_URL);
-
-    await cluster.idle();
-    await cluster.close();
-  }, 60000);
 });
