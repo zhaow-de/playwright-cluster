@@ -1,3 +1,5 @@
+// noinspection DuplicatedCode
+
 import { ExecuteResolve, ExecuteReject, ExecuteCallbacks, Job } from './Job.js';
 import { Display } from './Display.js';
 import * as util from './util.js';
@@ -5,7 +7,8 @@ import { Worker, WorkResult } from './Worker.js';
 
 import * as builtInConcurrency from './concurrency/builtInConcurrency.js';
 
-import type { Page, LaunchOptions, BrowserContextOptions } from 'playwright';
+import type { Page, LaunchOptions, BrowserContextOptions, BrowserType } from 'playwright';
+import { firefox } from 'playwright';
 import { Queue } from './Queue.js';
 import { SystemMonitor } from './SystemMonitor.js';
 import { EventEmitter } from 'events';
@@ -30,7 +33,7 @@ interface ClusterOptions {
   retryDelay: number;
   skipDuplicateUrls: boolean;
   sameDomainDelay: number;
-  playwright: any;
+  playwright: BrowserType | null | undefined;
 }
 
 type Partial<T> = {
@@ -56,6 +59,29 @@ const DEFAULT_OPTIONS: ClusterOptions = {
   sameDomainDelay: 0,
   playwright: undefined,
 };
+
+interface WorkersInfo {
+  id: number;
+  status: string;
+  url: string;
+}
+
+interface StatusMetrics {
+  startTime: string;
+  now: string;
+  idle: boolean;
+  doneTargets: number;
+  allTargetCount: number;
+  donePercStr: string;
+  errorCount: number;
+  errorPerc: string;
+  timeRunning: string;
+  timeRemaining: string;
+  pagesPerSecond: string;
+  pagesPerSecondString: string;
+  remainingPages: number;
+  workers: WorkersInfo[];
+}
 
 interface TaskFunctionArguments<JobData> {
   page: Page;
@@ -96,7 +122,7 @@ export class Cluster<JobData = any, ReturnData = any> extends EventEmitter {
   private startTime = Date.now();
   private nextWorkerId = -1;
 
-  private monitoringInterval: NodeJS.Timer | null = null;
+  private monitoringInterval: NodeJS.Timeout | null = null;
   private display: Display | null = null;
 
   private duplicateCheckUrls: Set<string> = new Set();
@@ -104,7 +130,7 @@ export class Cluster<JobData = any, ReturnData = any> extends EventEmitter {
 
   private systemMonitor: SystemMonitor = new SystemMonitor();
 
-  private checkForWorkInterval: NodeJS.Timer | null = null;
+  private checkForWorkInterval: NodeJS.Timeout | null = null;
 
   public static async launch(options: ClusterOptionsArgument) {
     debug('Launching');
@@ -134,21 +160,21 @@ export class Cluster<JobData = any, ReturnData = any> extends EventEmitter {
 
     if (this.options.playwright == null) {
       // check for null or undefined
-      playwright = await import('playwright');
+      playwright = firefox;
     } else {
       /* istanbul ignore next */
       debug('Using provided (custom) playwright object.');
     }
 
     if (this.options.concurrency === Cluster.CONCURRENCY_PAGE) {
-      this.browser = new builtInConcurrency.Page(browserOptions, contextOptions, playwright);
+      this.browser = new builtInConcurrency.Page(browserOptions, contextOptions, playwright!);
     } else if (this.options.concurrency === Cluster.CONCURRENCY_CONTEXT) {
-      this.browser = new builtInConcurrency.Context(browserOptions, contextOptions, playwright);
+      this.browser = new builtInConcurrency.Context(browserOptions, contextOptions, playwright!);
     } else if (this.options.concurrency === Cluster.CONCURRENCY_BROWSER) {
-      this.browser = new builtInConcurrency.Browser(browserOptions, contextOptions, playwright);
+      this.browser = new builtInConcurrency.Browser(browserOptions, contextOptions, playwright!);
     } else if (typeof this.options.concurrency === 'function') {
       // eslint-disable-next-line new-cap
-      this.browser = new this.options.concurrency(browserOptions, contextOptions, playwright);
+      this.browser = new this.options.concurrency(browserOptions, contextOptions, playwright!);
     } else {
       throw new Error(`Unknown concurrency option: ${this.options.concurrency}`);
     }
@@ -227,7 +253,7 @@ export class Cluster<JobData = any, ReturnData = any> extends EventEmitter {
   }
 
   private nextWorkCall = 0;
-  private workCallTimeout: NodeJS.Timer | null = null;
+  private workCallTimeout: NodeJS.Timeout | null = null;
 
   // check for new work soon (wait if there will be put more data into the queue, first)
   private async work() {
@@ -247,10 +273,22 @@ export class Cluster<JobData = any, ReturnData = any> extends EventEmitter {
   }
 
   private async doWork() {
-    if (this.jobQueue.size() === 0) {
+    if (this.jobQueue.size() === 0 || this.isClosed) {
       // no jobs available
       if (this.workersBusy.length === 0) {
-        this.idleResolvers.forEach((resolve) => resolve());
+        // allow retry jobs to be executed.
+        setTimeout(() => {
+          if (this.jobQueue.size() === 0 || this.isClosed) {
+            // no jobs available
+            if (this.workersBusy.length === 0) {
+              this.idleResolvers.forEach((resolve) => resolve());
+              // if any tasks has completed
+              if (this.allTargetCount > 0) {
+                this.emit('idle');
+              }
+            }
+          }
+        }, 500);
       }
       return;
     }
@@ -275,7 +313,7 @@ export class Cluster<JobData = any, ReturnData = any> extends EventEmitter {
     const domain = job.getDomain();
 
     // Check if URL was already crawled (on skipDuplicateUrls)
-    if (this.options.skipDuplicateUrls && url !== undefined && this.duplicateCheckUrls.has(url)) {
+    if (this.options.skipDuplicateUrls && url !== undefined && this.duplicateCheckUrls.has(url) && job.tries === 0) {
       // already crawled, just ignore
       debug(`Skipping duplicate URL: ${job.getUrl()}`);
       this.work();
@@ -442,8 +480,8 @@ export class Cluster<JobData = any, ReturnData = any> extends EventEmitter {
   public async close(): Promise<void> {
     this.isClosed = true;
 
-    clearInterval(this.checkForWorkInterval as NodeJS.Timer);
-    clearTimeout(this.workCallTimeout as NodeJS.Timer);
+    clearInterval(this.checkForWorkInterval as NodeJS.Timeout);
+    clearTimeout(this.workCallTimeout as NodeJS.Timeout);
 
     // close workers
     await Promise.all(this.workers.map((worker) => worker.close()));
@@ -490,7 +528,7 @@ export class Cluster<JobData = any, ReturnData = any> extends EventEmitter {
     if (donePercentage !== 0) {
       timeRemainingMillis = timeDiff / donePercentage - timeDiff;
     }
-    const timeRemining = util.formatDuration(timeRemainingMillis);
+    const timeRemaining = util.formatDuration(timeRemainingMillis);
 
     const cpuUsage = this.systemMonitor.getCpuUsage().toFixed(1);
     const memoryUsage = this.systemMonitor.getMemoryUsage().toFixed(1);
@@ -503,7 +541,7 @@ export class Cluster<JobData = any, ReturnData = any> extends EventEmitter {
       `== Progress:  ${doneTargets} / ${this.allTargetCount} (${donePercStr}%)` +
         `, errors: ${this.errorCount} (${errorPerc}%)`
     );
-    display.log(`== Remaining: ${timeRemining} (@ ${pagesPerSecond} pages/second)`);
+    display.log(`== Remaining: ${timeRemaining} (@ ${pagesPerSecond} pages/second)`);
     display.log(`== Sys. load: ${cpuUsage}% CPU / ${memoryUsage}% memory`);
     display.log(`== Workers:   ${this.workers.length + this.workersStarting}`);
 
@@ -531,5 +569,65 @@ export class Cluster<JobData = any, ReturnData = any> extends EventEmitter {
     }
 
     display.resetCursor();
+  }
+
+  public status(): StatusMetrics {
+    const now = Date.now();
+    const timeDiff = now - this.startTime;
+
+    const doneTargets = this.allTargetCount - this.jobQueue.size() - this.workersBusy.length;
+    const donePercentage = this.allTargetCount === 0 ? 1 : doneTargets / this.allTargetCount;
+    const donePercStr = (100 * donePercentage).toFixed(2);
+
+    const errorPerc = doneTargets === 0 ? '0.00' : ((100 * this.errorCount) / doneTargets).toFixed(2);
+
+    const timeRunning = util.formatDuration(timeDiff);
+
+    let timeRemainingMillis = -1;
+    if (donePercentage !== 0) {
+      timeRemainingMillis = timeDiff / donePercentage - timeDiff;
+    }
+    const timeRemaining = util.formatDuration(timeRemainingMillis);
+    const pagesPerSecond = doneTargets === 0 ? '0' : ((doneTargets * 1000) / timeDiff).toFixed(2);
+
+    const workersInfo = this.workers.map((worker, i) => {
+      const isIdle = this.workersAvail.indexOf(worker) !== -1;
+      let workOrIdle;
+      let workerUrl = '';
+      if (isIdle) {
+        workOrIdle = 'IDLE';
+      } else {
+        workOrIdle = 'WORK';
+        if (worker.activeTarget) {
+          workerUrl = worker.activeTarget.getUrl() || 'UNKNOWN TARGET';
+        } else {
+          /* istanbul ignore next */
+          workerUrl = 'NO TARGET (should not be happening)';
+        }
+      }
+      return {
+        id: i,
+        status: workOrIdle,
+        url: workerUrl,
+      };
+    });
+    const clusterIsIdle = this.workersBusy.length === 0 && this.jobQueue.size() === 0;
+
+    return {
+      startTime: util.formatDateTime(this.startTime),
+      now: util.formatDateTime(now),
+      doneTargets,
+      idle: clusterIsIdle,
+      allTargetCount: this.allTargetCount,
+      donePercStr: donePercStr + '%',
+      errorCount: this.errorCount,
+      remainingPages: this.jobQueue.size(),
+      errorPerc: errorPerc + '%',
+      timeRunning,
+      timeRemaining,
+      pagesPerSecond,
+      pagesPerSecondString: pagesPerSecond + ' pages/second',
+      workers: workersInfo,
+    };
   }
 }

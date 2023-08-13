@@ -1,4 +1,4 @@
-import * as playwright from 'playwright';
+import { Browser, BrowserContextOptions, BrowserType, LaunchOptions } from 'playwright';
 import { ConcurrencyImplementation, ResourceData } from './ConcurrencyImplementation.js';
 
 import { debugGenerator, timeoutExecute } from '../util.js';
@@ -8,18 +8,14 @@ const debug = debugGenerator('SingleBrowserImpl');
 const BROWSER_TIMEOUT = 5000;
 
 export abstract class SingleBrowserImplementation extends ConcurrencyImplementation {
-  protected browser: playwright.Browser | null = null;
+  protected browser: Browser | null = null;
 
   private repairing = false;
   private repairRequested = false;
   private openInstances = 0;
   private waitingForRepairResolvers: (() => void)[] = [];
 
-  public constructor(
-    options: playwright.LaunchOptions,
-    contextOptions: playwright.BrowserContextOptions,
-    playwright: any
-  ) {
+  public constructor(options: LaunchOptions, contextOptions: BrowserContextOptions, playwright: BrowserType) {
     super(options, contextOptions, playwright);
   }
 
@@ -35,14 +31,14 @@ export abstract class SingleBrowserImplementation extends ConcurrencyImplementat
 
     try {
       // will probably fail, but just in case the repair was not necessary
-      await (this.browser as playwright.Browser).close();
+      await (this.browser as Browser).close();
     } catch (e) {
       /* istanbul ignore next */
       debug('Unable to close browser.');
     }
 
     try {
-      this.browser = (await this.playwright.firefox.launch(this.options)) as playwright.Browser;
+      this.browser = (await this.playwright.launch(this.options)) as Browser;
     } catch (err) {
       /* istanbul ignore next */
       throw new Error('Unable to restart browser.');
@@ -55,11 +51,11 @@ export abstract class SingleBrowserImplementation extends ConcurrencyImplementat
   }
 
   public async init() {
-    this.browser = await this.playwright.firefox.launch(this.options);
+    this.browser = await this.playwright.launch(this.options);
   }
 
   public async close() {
-    await (this.browser as playwright.Browser).close();
+    await (this.browser as Browser).close();
   }
 
   protected abstract createResources(): Promise<ResourceData>;
@@ -98,7 +94,9 @@ export abstract class SingleBrowserImplementation extends ConcurrencyImplementat
         };
       },
 
-      close: async () => {},
+      close: async () => {
+        await this.close();
+      },
 
       repair: async () => {
         debug('Repair requested');
