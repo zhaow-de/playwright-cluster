@@ -57,7 +57,7 @@ export const formatDuration = (millis: number): string => {
 };
 
 export const timeoutExecute = async <T>(millis: number, promise: Promise<T>): Promise<T> => {
-  let timeout: NodeJS.Timer | null = null;
+  let timeout: NodeJS.Timeout | null = null;
 
   const result = await Promise.race([
     (async () => {
@@ -71,12 +71,12 @@ export const timeoutExecute = async <T>(millis: number, promise: Promise<T>): Pr
         return await promise;
       } catch (error: any) {
         // Cancel timeout in error case
-        clearTimeout(timeout as any as NodeJS.Timer);
+        clearTimeout(timeout as any as NodeJS.Timeout);
         throw error;
       }
     })(),
   ]);
-  clearTimeout(timeout as any as NodeJS.Timer); // is there a better way?
+  clearTimeout(timeout as any as NodeJS.Timeout); // is there a better way?
   return result;
 };
 

@@ -34,7 +34,7 @@ export class SystemMonitor {
   }
 
   public close() {
-    clearInterval(this.interval as NodeJS.Timer);
+    clearInterval(this.interval as NodeJS.Timeout);
   }
 
   private calcLoad() {
