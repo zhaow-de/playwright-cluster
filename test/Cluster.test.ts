@@ -315,7 +315,7 @@ describe('options', () => {
         concurrency,
         playwrightOptions: { args: ['--no-sandbox'] },
         maxConcurrency: 1,
-        sameDomainDelay: 1000,
+        sameDomainDelay: 5000,
       });
       cluster.on('taskerror', (err) => {
         throw err;
