@@ -1,6 +1,6 @@
 # Playwright Cluster
 
-Current version: **v1.4.0**
+Current version: **v1.5.0**
 
 ![Build Status](https://github.com/zhaow-de/playwright-cluster/actions/workflows/build.yml/badge.svg)
 ![npm (scoped)](https://img.shields.io/npm/v/@zhaow-de/playwright-cluster)
