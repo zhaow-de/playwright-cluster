@@ -1,6 +1,6 @@
 # Playwright Cluster
 
-Current version: **v1.2.2**
+Current version: **v2.0.0**
 
 ![Build Status](https://github.com/alloy-ch/playwright-cluster/actions/workflows/build.yml/badge.svg)
 ![cov lines](./coverage/badge-lines.svg)
