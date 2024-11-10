@@ -2,7 +2,7 @@ import playwright from 'playwright';
 
 import { ResourceData } from '../ConcurrencyImplementation.js';
 import { SingleBrowserImplementation } from '../SingleBrowserImplementation.js';
-import debug = require('debug');
+import debug from 'debug';
 
 export class Context extends SingleBrowserImplementation {
   public async init() {}

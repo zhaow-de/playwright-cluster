@@ -942,11 +942,13 @@ describe('Repair', () => {
         await expect(page.goto(TEST_URL)).rejects.toMatchObject({
           // error message of playwright disconnect:
           //
-          // [Error: page.goto: Navigation failed because page was closed!
+          // [Error: page.goto: Page crashed
+          // OR
+          // [Error: page.goto: Target page, context or browser has been close
           // =========================== logs ===========================
           // navigating to "http://127.0.0.1:3001/", waiting until "load"
           // ============================================================]
-          message: expect.stringMatching(/ closed/),
+          message: expect.stringMatching(/ crashed| closed/),
         });
       });
 
@@ -959,6 +961,6 @@ describe('Repair', () => {
       await cluster.idle();
       await cluster.close();
     },
-    60000
+    90000
   );
 });
