@@ -3,10 +3,6 @@
 Current version: **v1.2.2**
 
 ![Build Status](https://github.com/alloy-ch/playwright-cluster/actions/workflows/build.yml/badge.svg)
-![npm (scoped)](https://img.shields.io/npm/v/@alloy-ch/playwright-cluster?registry_uri=https%3A%2F%2Fnpm.pkg.github.com)
-![npm download](https://img.shields.io/npm/dm/@alloy-ch/playwright-cluster?registry_uri=https%3A%2F%2Fnpm.pkg.github.com)
-![MIT License](https://img.shields.io/npm/l/@alloy-ch/playwright-cluster?registry_uri=https%3A%2F%2Fnpm.pkg.github.com)
-
 ![cov lines](./coverage/badge-lines.svg)
 ![cov functions](./coverage/badge-functions.svg)
 ![cov statements](./coverage/badge-statements.svg)
