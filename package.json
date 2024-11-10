@@ -8,6 +8,7 @@
   "scripts": {
     "build": "rimraf dist && npx tsc -p tsconfig.release.json",
     "test": "NODE_ENV=development NODE_OPTIONS=--experimental-vm-modules npx jest --collectCoverage --detectOpenHandles  --errorOnDeprecated --logHeapUsage --forceExit --runInBand --bail",
+    "coverage": "npx jest-coverage-badges && rimraf coverage/coverage-summary.json",
     "dev": "npx tsc --watch"
   },
   "engines": {
@@ -32,6 +33,7 @@
   },
   "devDependencies": {
     "@alloy-ch/eslint-config-alloy": "^0.1.3",
+    "@alloy-ch/jest-coverage-badges": "^1.1.4",
     "@tsconfig/node22": "^22.0.0",
     "@types/debug": "^4.1.12",
     "@types/jest": "^29.5.14",

@@ -5,9 +5,13 @@ Current version: **v1.5.0**
 ![Build Status](https://github.com/zhaow-de/playwright-cluster/actions/workflows/build.yml/badge.svg)
 ![npm (scoped)](https://img.shields.io/npm/v/@zhaow-de/playwright-cluster)
 ![npm download](https://img.shields.io/npm/dm/@zhaow-de/playwright-cluster)
-![Coverage Status](https://coveralls.io/repos/github/zhaow-de/playwright-cluster/badge.svg?branch=main)
-![Known Vulnerabilities](https://snyk.io/test/github/zhaow-de/playwright-cluster/badge.svg)
+![Snyk](https://snyk.io/test/github/zhaow-de/playwright-cluster/badge.svg)
 ![MIT License](https://img.shields.io/npm/l/@zhaow-de/playwright-cluster.svg)
+
+![cov lines](./coverage/badge-lines.svg)
+![cov functions](./coverage/badge-functions.svg)
+![cov statements](./coverage/badge-statements.svg)
+![cov branches](./coverage/badge-branches.svg)
 
 [puppeteer-cluster](https://github.com/thomasdondorf/puppeteer-cluster) is a great library manages a
 [puppeteer](https://github.com/puppeteer/puppeteer) cluster. This is re-implementation to make it work with 
